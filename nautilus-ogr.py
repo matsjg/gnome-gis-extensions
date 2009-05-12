@@ -1,11 +1,6 @@
-# Trivial Mercurial plugin for Nautilus
+# Trivial OGR plugin for Nautilus
 #
-# Copyright (C) 2007 Steve Borho
-#
-# Stolen mercilessly from nautilus-bzr, thanks guys
-# Copyright (C) 2006 Jeff Bailey
-# Copyright (C) 2006 Wouter van Heyst
-# Copyright (C) 2006 Jelmer Vernooij
+# Shamelessly adapted from Mercurial Nautilus Plugin
 #
 # Published under the GNU GPL
 
@@ -37,7 +32,6 @@ class GisExtension(nautilus.MenuProvider,nautilus.InfoProvider,nautilus.Property
         '''Return emblem and hg status for this file'''
         file.add_string_attribute('ogr_status', '?')
     
-    # property page borrowed from http://www.gnome.org/~gpoo/hg/nautilus-hg/
     def __add_row(self, table, row, label_item, label_value):
         label = gtk.Label(label_item)
         label.set_use_markup(True)
@@ -90,13 +84,10 @@ class GisExtension(nautilus.MenuProvider,nautilus.InfoProvider,nautilus.Property
 
         self.__add_row(table, 0, '<b>Features</b>:', featureInfo[1])
         self.__add_row(table, 1, '<b>Geometry</b>:', featureInfo[0])
-        self.__add_row(table, 2, '<b>Col3</b>:', 'Col3')
-        self.__add_row(table, 3, '<b>Col4</b>:', 'Col4')
-        self.__add_row(table, 4, '<b>Col5</b>:', 'Col5')
         
         table.show()
 
-        return nautilus.PropertyPage("MercurialPropertyPage::status",
+        return nautilus.PropertyPage("OGRPropertyPage::status",
                                      self.property_label, table),
 
 
