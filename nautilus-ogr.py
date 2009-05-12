@@ -51,7 +51,7 @@ class GisExtension(nautilus.MenuProvider,nautilus.InfoProvider,nautilus.Property
         return urllib.unquote(vfs_file.get_uri()[7:])
     
     def __get_feature_info(self, vfs_files):
-	if len(vfs_files) != 1:
+	     if len(vfs_files) != 1:
             return
         file = vfs_files[0]
         path = self.get_path_for_vfs_file(file)
