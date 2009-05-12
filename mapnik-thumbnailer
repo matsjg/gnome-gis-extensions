@@ -1,0 +1,97 @@
+#!/usr/bin/env python
+# -*- coding: iso-8859-1 -*-
+
+##
+# Mapnik-thumbnailer
+# Generates thumbnails for ESRI-shapefiles
+#
+# @author Mats Norén
+# @author Per-Olof Norén
+#
+##
+
+import sys
+import os
+import mapnik
+import gnome.ui
+import gnomevfs
+
+
+
+try:
+    from osgeo import ogr
+    from osgeo import gdal
+except ImportError:
+    import ogr
+    import gdal
+
+def mapnikThumbnail(input, output, size):
+    #TODO refaktra hit
+    
+    # Använd input och läs in fil
+    shapeFile = ogr.Open(gnomevfs.get_local_path_from_uri(input))
+    # Ta ut lager
+    layer = shapeFile.GetLayer(0)
+    srs = layer.GetSpatialRef()
+    proj4 = srs.ExportToProj4()
+    # Lagernamn för att namnge lager i mapnik
+    layerName = layer.GetName()
+    mapnikMap = mapnik.Map(size, size, proj4)
+    mapnikMap.background = mapnik.Color('white')
+
+    style = getStyle(layer)
+    mapnikMap.append_style("Default", style)
+    mapnikLayer = mapnik.Layer(layerName, proj4)
+    
+    # Kan vara så att vi inte får hela sökvägen?
+    mapnikLayer.datasource = mapnik.Shapefile(file=gnomevfs.get_local_path_from_uri(input))
+    mapnikLayer.styles.append('Default')
+    
+    mapnikMap.layers.append(mapnikLayer)
+    mapnikMap.zoom_to_box(mapnikLayer.envelope())
+
+    # vad kallar man utfilen? Finns det funktioner för att ge dem korrekt namn?
+    # Vi får korrekt namn inskickat. Kolla schema-filen, de kryptiska %u %o därav output, är du med?
+    mapnik.render_to_file(mapnikMap, output, 'png')
+    return
+
+##
+# Add style information to map
+# @param layer OGR Layer
+#
+def getStyle(layer):
+    # Todo läs in från xml-fil baserat på geometrityp från OGR-lager
+    #geometryColumnValue = layer.GetLayerDefn().GetGeomType()
+	#if   geometryColumnValue == 0: geometryColumn = "Unknown"
+	#elif geometryColumnValue == 1: geometryColumn = "Point"
+	#elif geometryColumnValue == 2: geometryColumn = "LineString"
+	#elif geometryColumnValue == 3: geometryColumn = "Polygon"
+	#elif geometryColumnValue == 4: geometryColumn = "MultiPoint"
+	#elif geometryColumnValue == 5: geometryColumn = "MultiLineString"
+	#elif geometryColumnValue == 6: geometryColumn = "MultiPolygon"
+	#elif geometryColumnValue == 7: geometryColumn = "GeometryCollection"
+		
+    style = mapnik.Style()
+    rule = mapnik.Rule()
+    #rule.symbols.append(mapnik.PolygonSymbolizer(mapnik.Color('#f2eff9')))
+    rule.symbols.append(mapnik.LineSymbolizer(mapnik.Color('#000000'),1))
+    style.rules.append(rule)
+    return style
+
+##
+# PythonDoc enligt: http://effbot.org/zone/pythondoc.htm#syntax
+# @param height Height of map. 
+#     Denna kommentaren spänner två pythondoc-rader
+#     och nu plöstligt blev det tre :-)
+def createMapnikMap(height, width, srstext):
+	pass    
+
+def main():
+    input = sys.argv[1]
+    output = sys.argv[2]
+    size = int(sys.argv[3])
+    mapnikThumbnail(input, output, size)	
+
+    
+if __name__ == "__main__":
+    main()
