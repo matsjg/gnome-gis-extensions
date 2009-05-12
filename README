@@ -5,7 +5,7 @@ python > 2.5
 python-mapnik (tested with 0.6 built from source, for Ubuntu instructions see http://trac.mapnik.org/wiki/UbuntuInstallation)
 python-gdal
 
-First test with gnomevfs-info if the mime-type is registread already:
+First test with gnomevfs-info if the mime-type is registered already:
 
 gnomevfs-info yourshape.shp
 
