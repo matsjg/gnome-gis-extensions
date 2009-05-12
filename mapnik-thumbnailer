@@ -3,13 +3,13 @@
 
 import os
 import sys
-from osgeo import ogr as myogr
+from osgeo import ogr
 import gnomevfs
 from mapnik import *
 
 def mapnikThumbnail(inFile, outFile, size):
 	localShapePath = gnomevfs.get_local_path_from_uri(inFile)
-	ogrShapeFile = myogr.Open(localShapePath)
+	ogrShapeFile = ogr.Open(localShapePath)
 	layerInfo = ogrShapeFile.GetLayer(0)
 	srsString = layerInfo.GetSpatialRef()
 	proj4String = srsString.ExportToProj4()	
@@ -18,11 +18,6 @@ def mapnikThumbnail(inFile, outFile, size):
 	m.background = Color('white')
 
 	# Styles
-	#poly = PolygonSymbolizer(Color('lavender'))
-	#line = LineSymbolizer(Color('#000000'),1)
-	#s,r = Style(),Rule()
-	#r.symbols.extend([line])
-	#s.rules.append(r)
 	style = getStyle("")
 	m.append_style('Default',style)
 
@@ -30,7 +25,6 @@ def mapnikThumbnail(inFile, outFile, size):
 	lyr = Layer('world')
 	lyr.datasource = Shapefile(file=localShapePath)
 	lyr.srs = proj4String
-	#'+proj=tmerc +lat_0=0 +lon_0=18.05779 +k=0.99999425 +x_0=100178.1808 +y_0=-6500614.7836 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs'
 	lyr.styles.append('Default')
 	m.layers.append(lyr)
 
@@ -43,7 +37,7 @@ def mapnikThumbnail(inFile, outFile, size):
 # @param layer OGR Layer
 #
 def getStyle(layer):
-	# Todo läs in från xml-fil baserat på geometrityp från OGR-lager
+	# Todo read from XML-file different styles based on geometry type
 	#geometryColumnValue = layer.GetLayerDefn().GetGeomType()
 	#if   geometryColumnValue == 0: geometryColumn = "Unknown"
 	#elif geometryColumnValue == 1: geometryColumn = "Point"
@@ -57,7 +51,6 @@ def getStyle(layer):
 	style,rule = Style(),Rule()
 	rule.symbols.append(PointSymbolizer())
 	rule.symbols.append(LineSymbolizer(Color('#000000'),1))
-	#rule.symbols.append(PolygonSymbolizer(Color('#000000')))
 	style.rules.append(rule)
 	return style
 
