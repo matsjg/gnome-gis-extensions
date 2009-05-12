@@ -71,8 +71,9 @@ def getStyle(layer):
 		
     style = mapnik.Style()
     rule = mapnik.Rule()
-    #rule.symbols.append(mapnik.PolygonSymbolizer(mapnik.Color('#f2eff9')))
+    rule.symbols.append(mapnik.PointSymbolizer())
     rule.symbols.append(mapnik.LineSymbolizer(mapnik.Color('#000000'),1))
+    rule.symbols.append(mapnik.PolygonSymbolizer(mapnik.Color('#000000')))
     style.rules.append(rule)
     return style
 
