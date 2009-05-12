@@ -27,9 +27,9 @@ except ImportError:
 
 def mapnikThumbnail(input, output, size):
     #TODO refaktra hit
-    
+    localShapePath = gnomevfs.get_local_path_from_uri(input)
     # Använd input och läs in fil
-    shapeFile = ogr.Open(gnomevfs.get_local_path_from_uri(input))
+    shapeFile = ogr.Open(localShapePath)
     # Ta ut lager
     layer = shapeFile.GetLayer(0)
     srs = layer.GetSpatialRef()
@@ -44,7 +44,7 @@ def mapnikThumbnail(input, output, size):
     mapnikLayer = mapnik.Layer(layerName, proj4)
     
     # Kan vara så att vi inte får hela sökvägen?
-    mapnikLayer.datasource = mapnik.Shapefile(file=gnomevfs.get_local_path_from_uri(input))
+    mapnikLayer.datasource = mapnik.Shapefile(file=localShapePath)
     mapnikLayer.styles.append('Default')
     
     mapnikMap.layers.append(mapnikLayer)
@@ -78,13 +78,6 @@ def getStyle(layer):
     style.rules.append(rule)
     return style
 
-##
-# PythonDoc enligt: http://effbot.org/zone/pythondoc.htm#syntax
-# @param height Height of map. 
-#     Denna kommentaren spänner två pythondoc-rader
-#     och nu plöstligt blev det tre :-)
-def createMapnikMap(height, width, srstext):
-	pass    
 
 def main():
     input = sys.argv[1]
