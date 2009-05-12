@@ -1,0 +1,46 @@
+TODO Installation steps (before we create a deb)
+
+Prerequisites:
+python > 2.5
+python-mapnik (tested with 0.6 built from source, for Ubuntu instructions see http://trac.mapnik.org/wiki/UbuntuInstallation)
+python-gdal
+
+First test with gnomevfs-info if the mime-type is registread already:
+
+gnomevfs-info yourshape.shp
+
+If the mime-type is "application/octet-stream" add the following to /usr/share/mime/packages/Overrides.xml:
+
+<mime-type type="application/x-esri-shape">
+   <comment>ESRI Shapefile</comment>
+   <glob pattern="*.shp"/>
+</mime-type>
+
+And update the mime database with:
+
+sudo update-mime-database /usr/share/mime
+
+Copy mapnik-thumbnailer.schema to /usr/share/gconf/schemas:
+
+sudo cp $WORKING_COPY/mapnik-thumbnailer.schema /usr/share/gconf/schemas
+
+Install it:
+
+gconftool-2 --install-schema-file /usr/share/gconf/schemas/mapnik-thumbnailer.schema 
+
+Copy the thumbnailer:
+
+sudo cp mapnik-thumbnailer /usr/bin
+
+Log out or restart Nautilus with:
+
+killall nautilus -9
+
+Open Nautilus and browse to a catalog with shape-files. You need to have the .prj files for this to work.
+With a little luck you will see a rendered map of your shape-file.
+  
+
+
+
+Reference:
+http://library.gnome.org/admin/system-admin-guide/stable/mimetypes-modifying.html.en#mimetypes-addmodify

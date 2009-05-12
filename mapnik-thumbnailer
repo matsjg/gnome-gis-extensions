@@ -50,8 +50,6 @@ def mapnikThumbnail(input, output, size):
     mapnikMap.layers.append(mapnikLayer)
     mapnikMap.zoom_to_box(mapnikLayer.envelope())
 
-    # vad kallar man utfilen? Finns det funktioner för att ge dem korrekt namn?
-    # Vi får korrekt namn inskickat. Kolla schema-filen, de kryptiska %u %o därav output, är du med?
     mapnik.render_to_file(mapnikMap, output, 'png')
     return
 
