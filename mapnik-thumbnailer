@@ -1,65 +1,50 @@
 #!/usr/bin/env python
-# -*- coding: iso-8859-1 -*-
+# -*- coding: utf-8 -*-
 
-##
-# Mapnik-thumbnailer
-# Generates thumbnails for ESRI-shapefiles
-#
-# @author Mats Norén
-# @author Per-Olof Norén
-#
-##
-
-import sys
 import os
-import mapnik
-import gnome.ui
+import sys
+from osgeo import ogr as myogr
 import gnomevfs
+from mapnik import *
 
+def mapnikThumbnail(inFile, outFile, size):
+	localShapePath = gnomevfs.get_local_path_from_uri(inFile)
+	ogrShapeFile = myogr.Open(localShapePath)
+	layerInfo = ogrShapeFile.GetLayer(0)
+	srsString = layerInfo.GetSpatialRef()
+	proj4String = srsString.ExportToProj4()	
+	# Map            
+	m = Map(size,size,proj4String)
+	m.background = Color('white')
 
+	# Styles
+	#poly = PolygonSymbolizer(Color('lavender'))
+	#line = LineSymbolizer(Color('#000000'),1)
+	#s,r = Style(),Rule()
+	#r.symbols.extend([line])
+	#s.rules.append(r)
+	style = getStyle("")
+	m.append_style('Default',style)
 
-try:
-    from osgeo import ogr
-    from osgeo import gdal
-except ImportError:
-    import ogr
-    import gdal
+	# Layer
+	lyr = Layer('world')
+	lyr.datasource = Shapefile(file=localShapePath)
+	lyr.srs = proj4String
+	#'+proj=tmerc +lat_0=0 +lon_0=18.05779 +k=0.99999425 +x_0=100178.1808 +y_0=-6500614.7836 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs'
+	lyr.styles.append('Default')
+	m.layers.append(lyr)
 
-def mapnikThumbnail(input, output, size):
-    #TODO refaktra hit
-    localShapePath = gnomevfs.get_local_path_from_uri(input)
-    # Använd input och läs in fil
-    shapeFile = ogr.Open(localShapePath)
-    # Ta ut lager
-    layer = shapeFile.GetLayer(0)
-    srs = layer.GetSpatialRef()
-    proj4 = srs.ExportToProj4()
-    # Lagernamn för att namnge lager i mapnik
-    layerName = layer.GetName()
-    mapnikMap = mapnik.Map(size, size, proj4)
-    mapnikMap.background = mapnik.Color('white')
-
-    style = getStyle(layer)
-    mapnikMap.append_style("Default", style)
-    mapnikLayer = mapnik.Layer(layerName, proj4)
-    
-    # Kan vara så att vi inte får hela sökvägen?
-    mapnikLayer.datasource = mapnik.Shapefile(file=localShapePath)
-    mapnikLayer.styles.append('Default')
-    
-    mapnikMap.layers.append(mapnikLayer)
-    mapnikMap.zoom_to_box(mapnikLayer.envelope())
-
-    mapnik.render_to_file(mapnikMap, output, 'png')
-    return
+	# Render
+	m.zoom_to_box(lyr.envelope())
+	render_to_file(m, outFile, 'png')
 
 ##
 # Add style information to map
 # @param layer OGR Layer
 #
 def getStyle(layer):
-    # Todo läs in från xml-fil baserat på geometrityp från OGR-lager
-    #geometryColumnValue = layer.GetLayerDefn().GetGeomType()
+	# Todo läs in från xml-fil baserat på geometrityp från OGR-lager
+	#geometryColumnValue = layer.GetLayerDefn().GetGeomType()
 	#if   geometryColumnValue == 0: geometryColumn = "Unknown"
 	#elif geometryColumnValue == 1: geometryColumn = "Point"
 	#elif geometryColumnValue == 2: geometryColumn = "LineString"
@@ -69,13 +54,12 @@ def getStyle(layer):
 	#elif geometryColumnValue == 6: geometryColumn = "MultiPolygon"
 	#elif geometryColumnValue == 7: geometryColumn = "GeometryCollection"
 		
-    style = mapnik.Style()
-    rule = mapnik.Rule()
-    rule.symbols.append(mapnik.PointSymbolizer())
-    rule.symbols.append(mapnik.LineSymbolizer(mapnik.Color('#000000'),1))
-    rule.symbols.append(mapnik.PolygonSymbolizer(mapnik.Color('#000000')))
-    style.rules.append(rule)
-    return style
+	style,rule = Style(),Rule()
+	rule.symbols.append(PointSymbolizer())
+	rule.symbols.append(LineSymbolizer(Color('#000000'),1))
+	#rule.symbols.append(PolygonSymbolizer(Color('#000000')))
+	style.rules.append(rule)
+	return style
 
 
 def main():
